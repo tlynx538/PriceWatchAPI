@@ -1,9 +1,8 @@
 import sqlalchemy as db 
 from datetime import datetime 
 from sqlalchemy.dialects import postgresql
-
+from fastapi import HTTPException
 class PriceWatchDB:
-
     def __init__(self):
         try:
             self.engine = db.create_engine("postgresql+psycopg2://localhost:5432/pricewatchdb")
@@ -11,9 +10,7 @@ class PriceWatchDB:
             self.metadata = db.MetaData()
             print("Database Connection Successful")
         except Exception as e:
-            print("Error Occured Connection Database\n")
-            print(e)
-            return -2 
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
     
     # Functions for Bearings 
     def getBearingSizes(self):
@@ -26,9 +23,7 @@ class PriceWatchDB:
                 ResultSet.append(i._asdict()["sizes"])
             return ResultSet
         except Exception as e:
-            print("Internal Server Error Detected:\n")
-            print(e)
-            return {"message": "Internal Server Error", "Exception Message":str(e)}
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
     
     def addBearings(self,size,vendor_id,rate,bill_rate):
         # skipping check if vendor and size exists (need to add later)
@@ -41,9 +36,8 @@ class PriceWatchDB:
             return {"message":"Row Added Successfully"}
         
         except Exception as e:
-            print("Internal Server Error Detected:\n")
-            print(e)
-            return {"message": "Internal Server Error", "Exception Message":str(e)}
+            self.connection.rollback() # rollback in case of error
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
             
 
     def getBearings(self,size,vendor_id):
@@ -57,9 +51,7 @@ class PriceWatchDB:
             return ResultSet
     
         except Exception as e:
-            print("Internal Server Error Detected:\n")
-            print(e)
-            return {"message": "Internal Server Error", "Exception Message":str(e)}  
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
         
     # Get Vendors
     def getVendors(self,vendor_type):
@@ -73,6 +65,4 @@ class PriceWatchDB:
             return ResultSet 
         
         except Exception as e:
-            print("Internal Server Error Detected:\n")
-            print(e)
-            return {"message": "Internal Server Error", "Exception Message":str(e)}
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
