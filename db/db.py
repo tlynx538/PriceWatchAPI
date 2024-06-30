@@ -40,10 +40,20 @@ class PriceWatchDB:
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
             
 
-    def getBearings(self,size,vendor_id):
+    def getBearings(self,size,vendor_name):
         try:
             ResultSet = []
             bearings = db.Table('bearings',self.metadata,autoload_with=self.engine)
+            vendors = db.Table('vendors',self.metadata,autoload_with=self.engine)
+
+            # Get Vendor ID
+            query = db.Select(vendors).where((vendors.c.vendor_type == "Bearings")&(vendors.c.vendor_name == vendor_name))
+            result = self.connection.execute(query)
+            vendor_id = 0
+
+            for i in result:
+                vendor_id = i._asdict()["vendor_id"]
+                break
             query = db.Select(bearings).where((bearings.c.size==size) & (bearings.c.vendor_id==vendor_id))
             result = self.connection.execute(query)
             for i in result:
@@ -66,3 +76,4 @@ class PriceWatchDB:
         
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+    

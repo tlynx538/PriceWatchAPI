@@ -6,6 +6,9 @@ from datetime import datetime
 
 origins = [
     "http://localhost:3000",
+    "*",
+    "http://192.168.0.131:3000"
+
 ]
 
 app = FastAPI()
@@ -42,9 +45,9 @@ def bearingSizes():
 def addBearings(br: Bearings):
     return db.addBearings(size=br.size,vendor_id=br.vendor_id,rate=br.rate,bill_rate=br.bill_rate)
 
-@app.get('/bearings')
-def getBearings(br: GetBearings):
-    return db.getBearings(size=br.size,vendor_id=br.vendor_id)
+@app.get('/bearings/'+'{size}'+'/'+'{vendor_name}')
+def getBearings(size,vendor_name):
+    return db.getBearings(size=size,vendor_name=vendor_name)
 
 @app.get('/vendors/'+'{vendor_type}')
 def vendors(vendor_type):
