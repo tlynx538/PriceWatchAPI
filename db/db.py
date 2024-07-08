@@ -25,10 +25,11 @@ class PriceWatchDB:
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
     
-    def addBearings(self,size,vendor_id,rate,bill_rate):
+    def addBearings(self,size,vendor_name,rate,bill_rate):
         # skipping check if vendor and size exists (need to add later)
         try:
             bearings = db.Table('bearings',self.metadata,autoload_with=self.engine)
+            vendor_id = self.getVendorID(vendor_type='Bearings',vendor_name=vendor_name)
             timestamp = datetime.now()
             query = db.insert(bearings).values(size=size,vendor_id=vendor_id,rate=rate,bill_rate=bill_rate,date_added=timestamp)
             self.connection.execute(query)
@@ -58,6 +59,7 @@ class PriceWatchDB:
             result = self.connection.execute(query)
             for i in result:
                 ResultSet.append(i._asdict())
+            ResultSet = ResultSet[::-1]
             return ResultSet
     
         except Exception as e:
@@ -76,4 +78,20 @@ class PriceWatchDB:
         
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+    
+    # Get Vendor ID
+    def getVendorID(self, vendor_type, vendor_name):
+        try:
+            ResultSet =[]
+            vendors = db.Table('vendors',self.metadata,autoload_with=self.engine)
+            query = db.Select(vendors).where((vendors.c.vendor_type == vendor_type) & (vendors.c.vendor_name == vendor_name))
+            result = self.connection.execute(query)
+            for i in result:
+                ResultSet.append(i._asdict()["vendor_id"])
+            return ResultSet[0]
+        
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Internal Server Error: {str(e)}")
+
+
     

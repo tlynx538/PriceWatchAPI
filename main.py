@@ -25,7 +25,7 @@ db = PriceWatchDB()
 
 class Bearings(BaseModel):
     size: str
-    vendor_id: int
+    vendor_name: str
     rate: float 
     bill_rate: float 
 
@@ -43,7 +43,7 @@ def bearingSizes():
  
 @app.post('/bearings')
 def addBearings(br: Bearings):
-    return db.addBearings(size=br.size,vendor_id=br.vendor_id,rate=br.rate,bill_rate=br.bill_rate)
+    return db.addBearings(size=br.size,vendor_name=br.vendor_name,rate=br.rate,bill_rate=br.bill_rate)
 
 @app.get('/bearings/'+'{size}'+'/'+'{vendor_name}')
 def getBearings(size,vendor_name):
